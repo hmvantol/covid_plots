@@ -57,19 +57,21 @@ Canada<- Canada[!duplicated(Canada),]
 require(tidyverse)
 d2<- Canada %>% 
 	group_by(Province=provinces,Day=format(Std.Time,'%Y-%m-%d')) %>%
-	# group_by(Province=provinces,Day=format(Std.Time,'%Y-%U')) %>%
 	summarize_if(is.numeric,max) %>%
 	mutate(Change=Total-dplyr::lag(Total,n=7))
-
 
 
 d3<- d2
 d3$Province <- factor(d3$Province,levels=provinces)
 
-ggplot(d3, aes(x=Total, y=Change, colour=Province, label=Province)) + geom_line() +
+d3$Change[which(d3$Change <= 0)] <- 1
+d3$Day<- as.Date(d3$Day)
+
+
+ggplot(d3, aes(x=Total, y=Change, colour=Province, label=Province)) + geom_line() + geom_point(size=0.5) +
  scale_x_log10() + scale_y_log10() +
  scale_colour_manual(values=c(rep('grey',length(unique(d3$Province))-2),'red','red')) +
- layer(data=d3[which(d3$Day == d3$Day[length(d3$Day)]),], geom='point',stat='identity',position='identity', params=list(colour='red')) +
+ layer(data=d3[which(d3$Day == d3$Day[length(d3$Day)]),], geom='point',stat='identity',position='identity', params=list(colour='red',size=2)) +
  layer(data=d3[which(d3$Day == d3$Day[length(d3$Day)]),], geom='text',stat='identity',position='identity', params=list(colour='black',vjust=0,hjust=0)) +
  coord_fixed(xlim=c(1,max(d3$Total,na.rm=T)*1.5), ylim=c(1,max(d3$Total,na.rm=T)*1.5),ratio=1) +
  labs(x='Total confirmed cases', y='New confirmed cases (in the last week)') + 

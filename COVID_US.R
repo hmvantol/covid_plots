@@ -1,6 +1,7 @@
 library('dplyr')
 library('ggplot2')
-library('gganimate')
+# library('gganimate')
+# library('gifski')
 
 setwd('/Users/hmvantol/COVID-19/csse_covid_19_data/csse_covid_19_daily_reports/')
 
@@ -31,7 +32,7 @@ US$Std.Time[which(is.na(US$Std.Time) == T)] <- strptime(US$Last.Update[which(is.
 US$Std.Time[which(is.na(US$Std.Time) == T)] <- strptime(US$Last.Update[which(is.na(US$Std.Time) == T)],format="%m/%d/%Y %H:%M",tz='UTC')
 
 US<- US[order(US$Std.Time),]
-US$Std.Time<- as.POSIXct(US$Std.Time)
+US$Std.Time<- as.POSIXct(US$Std.Time,tz='UTC')
 
 US$Province.State[which(US$Province.State == 'Virgin Islands, U.S.')] <- 'Virgin Islands'
 states<- t(as.data.frame(strsplit(as.character(US$Province.State),', ')))[,2]
@@ -95,7 +96,6 @@ US<- US[!duplicated(US),]
 require(tidyverse)
 d2<- US %>% 
 	group_by(State=states,Day=format(Std.Time,'%Y-%m-%d')) %>%
-	# group_by(State=states,Day=format(Std.Time,'%Y-%U')) %>%
 	summarize_if(is.numeric,max) %>%
 	mutate(Change=Total-dplyr::lag(Total,n=7))
 
@@ -107,11 +107,30 @@ d3$State <- factor(d3$State,levels=c('Washington','Texas','California','New York
 # d3<-d2
 # d3$State <- factor(d3$State,levels=state_names)
 
-ggplot(d3, aes(x=Total, y=Change, colour=State, label=State)) + geom_line() +
+d3$Change[which(d3$Change <= 0)] <- 1
+d3$Day<- as.Date(d3$Day)
+
+
+ggplot(d3, aes(x=Total, y=Change, colour=State, label=State)) + geom_line() + geom_point(size=0.5) +
  scale_x_log10() + scale_y_log10() +
  scale_colour_manual(values=c(rep('grey',length(unique(d3$State))-2),'red','red')) +
- layer(data=d3[which(d3$Day == d3$Day[length(d3$Day)]),], geom='point',stat='identity',position='identity', params=list(colour='red')) +
+ layer(data=d3[which(d3$Day == d3$Day[length(d3$Day)]),], geom='point',stat='identity',position='identity', params=list(colour='red',size=2)) +
  layer(data=d3[which(d3$Day == d3$Day[length(d3$Day)]),], geom='text',stat='identity',position='identity', params=list(colour='black',vjust=0, hjust=0)) +
- coord_fixed(xlim=c(min(d3$Total,na.rm=T),max(d3$Total,na.rm=T)*1.5), ylim=c(min(d3$Total,na.rm=T),max(d3$Total,na.rm=T)*1.5),ratio=1) +
+ coord_fixed(xlim=c(1,max(d3$Total,na.rm=T)*1.5), ylim=c(1,max(d3$Total,na.rm=T)*1.5),ratio=1) +
  labs(x='Total confirmed cases', y='New confirmed cases (in the last week)') + 
  theme_bw() + theme(legend.position='none')
+
+
+# #  
+# p<- ggplot(d3, aes(x=Total, y=Change, label=State)) + 
+ # geom_path(colour='grey') + geom_point(colour='red') + geom_text(hjust=0,vjust=0) + 
+ # scale_x_log10() + scale_y_log10() +
+ # coord_fixed(xlim=c(1,max(d3$Total,na.rm=T)*1.5), ylim=c(1,max(d3$Total,na.rm=T)*1.5),ratio=1) +
+ # theme_bw() + theme(legend.position='none',text=element_text(colour='black')) + 
+ # labs(x='Total confirmed cases', y='New confirmed cases (in the last week)',title='Date: {frame_along}') +
+ # transition_reveal(Day)
+
+
+# animate(p, renderer=gifski_renderer(), end_pause=30) 
+# anim_save('/Users/hmvantol/covid_plots/test.gif')
+
