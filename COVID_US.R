@@ -1,7 +1,7 @@
 library('dplyr')
 library('ggplot2')
-# library('gganimate')
-# library('gifski')
+library('gganimate')
+library('gifski')
 
 setwd('/Users/hmvantol/COVID-19/csse_covid_19_data/csse_covid_19_daily_reports/')
 
@@ -121,16 +121,16 @@ ggplot(d3, aes(x=Total, y=Change, colour=State, label=State)) + geom_line() + ge
  theme_bw() + theme(legend.position='none')
 
 
-# #  
-# p<- ggplot(d3, aes(x=Total, y=Change, label=State)) + 
- # geom_path(colour='grey') + geom_point(colour='red') + geom_text(hjust=0,vjust=0) + 
- # scale_x_log10() + scale_y_log10() +
- # coord_fixed(xlim=c(1,max(d3$Total,na.rm=T)*1.5), ylim=c(1,max(d3$Total,na.rm=T)*1.5),ratio=1) +
- # theme_bw() + theme(legend.position='none',text=element_text(colour='black')) + 
- # labs(x='Total confirmed cases', y='New confirmed cases (in the last week)',title='Date: {frame_along}') +
- # transition_reveal(Day)
+
+p<- ggplot(d3, aes(x=Total, y=Change, label=State)) + 
+ geom_path(colour='grey') + geom_point(colour='red') + geom_text(hjust=0,vjust=0) + 
+ scale_x_log10() + scale_y_log10() +
+ coord_fixed(xlim=c(1,max(d3$Total,na.rm=T)*1.5), ylim=c(1,max(d3$Total,na.rm=T)*1.5),ratio=1) +
+ theme_bw() + theme(legend.position='none',text=element_text(colour='black')) + 
+ labs(x='Total confirmed cases', y='New confirmed cases (in the last week)',title='Date: {frame_along}') +
+ transition_reveal(Day)
 
 
-# animate(p, renderer=gifski_renderer(), end_pause=30) 
-# anim_save('/Users/hmvantol/covid_plots/test.gif')
+animate(p, renderer=gifski_renderer()) 
+anim_save('/Users/hmvantol/covid_plots/covidUSA.gif')
 
