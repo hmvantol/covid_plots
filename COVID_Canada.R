@@ -66,9 +66,9 @@ d2<- Canada %>%
 d3<- d2
 d3$Province <- factor(d3$Province,levels=provinces)
 
-d3$Change[which(d3$Change <= 0)] <- 1
+d3$Change[which(d3$Change <= 0)] <- NA
 d3$Day<- as.Date(d3$Day)
-
+d3$Change[which(d3$Day == max(d3$Day) & is.na(d3$Change) == T)] <- 1
 
 ggplot(d3, aes(x=Total, y=Change, colour=Province, label=Province)) + geom_line() + geom_point(size=0.5) +
  scale_x_log10() + scale_y_log10() +
