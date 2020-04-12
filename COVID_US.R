@@ -2,6 +2,7 @@ library('dplyr')
 library('ggplot2')
 library('gganimate')
 library('gifski')
+library('scales')
 
 setwd('/Users/hmvantol/COVID-19/csse_covid_19_data/csse_covid_19_daily_reports/')
 
@@ -111,8 +112,11 @@ d3$Change[which(d3$Change <= 0)] <- NA
 d3$Day<- as.Date(d3$Day)
 d3$Change[which(d3$Day == max(d3$Day) & is.na(d3$Change) == T)] <- 1
 
+
+breaks <- 10^(-10:10)
+minor_breaks <- rep(1:9, 21)*(10^rep(-10:10, each=9))
 ggplot(d3, aes(x=Total, y=Change, colour=State, label=State)) + geom_line() + geom_point(size=0.5) +
- scale_x_log10() + scale_y_log10() +
+ scale_x_log10(breaks=breaks, minor_breaks=minor_breaks, labels = trans_format("log10", math_format(10^.x))) + scale_y_log10(breaks=breaks, minor_breaks=minor_breaks, labels = trans_format("log10", math_format(10^.x))) + 
  scale_colour_manual(values=c(rep('grey',length(unique(d3$State))-2),'red','red')) +
  layer(data=d3[which(d3$Day == d3$Day[length(d3$Day)]),], geom='point',stat='identity',position='identity', params=list(colour='red',size=2)) +
  layer(data=d3[which(d3$Day == d3$Day[length(d3$Day)]),], geom='text',stat='identity',position='identity', params=list(colour='black',vjust=0, hjust=0)) +
@@ -124,7 +128,7 @@ ggplot(d3, aes(x=Total, y=Change, colour=State, label=State)) + geom_line() + ge
 
 p<- ggplot(d3, aes(x=Total, y=Change, label=State)) + 
  geom_path(colour='grey') + geom_point(colour='red') + geom_text(hjust=0,vjust=0) + 
- scale_x_log10() + scale_y_log10() +
+ scale_x_log10(breaks=breaks, minor_breaks=minor_breaks, labels = trans_format("log10", math_format(10^.x))) + scale_y_log10(breaks=breaks, minor_breaks=minor_breaks, labels = trans_format("log10", math_format(10^.x))) + 
  coord_fixed(xlim=c(1,max(d3$Total,na.rm=T)*1.5), ylim=c(1,max(d3$Total,na.rm=T)*1.5),ratio=1) +
  theme_bw() + theme(legend.position='none',text=element_text(colour='black')) + 
  labs(x='Total confirmed cases', y='New confirmed cases (in the last week)',title='Date: {frame_along}') +
